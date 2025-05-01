@@ -95,8 +95,11 @@ interface UpdateBookModalProps {
 function UpdateBookModal({ book, onClose }: UpdateBookModalProps) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
-    ...book,
-    publicationYear: book.publicationYear.toString()
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    description: book.description,
+    publicationYear: String(book.publicationYear || '')
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -131,6 +134,9 @@ function UpdateBookModal({ book, onClose }: UpdateBookModalProps) {
       queryClient.invalidateQueries({ queryKey: ['books'] });
       onClose();
     },
+    onError: (error: any) => {
+      console.error('Update book error:', error);
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
