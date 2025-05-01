@@ -11,15 +11,15 @@ interface Book {
   year: number;
 }
 
-const Books = () => {
+const book = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Fetch books from backend
-  const { data: books = [], isLoading } = useQuery<Book[]>({
-    queryKey: ["books"],
+  // Fetch book from backend
+  const { data: book = [], isLoading } = useQuery<Book[]>({
+    queryKey: ["book"],
     queryFn: async () => {
-      const res = await axios.get("/books");
+      const res = await axios.get("/book");
       return res.data;
     },
   });
@@ -27,10 +27,10 @@ const Books = () => {
   // Delete book mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await axios.delete(`/books/${id}`);
+      await axios.delete(`/book/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["books"] });
+      queryClient.invalidateQueries({ queryKey: ["book"] });
     },
   });
 
@@ -41,14 +41,14 @@ const Books = () => {
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Books</h1>
+        <h1 className="text-2xl font-semibold">book</h1>
       </div>
 
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {books.map((book) => (
+          {book.map((book) => (
             <BookCard
               key={book.id}
               book={book}
@@ -69,4 +69,4 @@ const Books = () => {
   );
 };
 
-export default Books;
+export default book;
