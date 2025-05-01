@@ -1,3 +1,4 @@
+// pages/Books.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/BookCard";
@@ -11,6 +12,7 @@ interface Book {
   author: string;
   description: string;
   year: number;
+  image?: string;
 }
 
 const Books = () => {
@@ -40,12 +42,13 @@ const Books = () => {
               key={book.id}
               book={book}
               onEdit={() => navigate(`/edit-book/${book.id}`)}
-              onDelete={() => setSelectedBookId(book.id)}
+              onDelete={() => setSelectedBookId(book.id)} // 🔥 trigger modal
             />
           ))}
         </div>
       )}
 
+      {/* 🔥 Delete confirmation dialog */}
       {selectedBookId !== null && (
         <DeleteConfirmDialog
           bookId={selectedBookId.toString()}
@@ -53,6 +56,7 @@ const Books = () => {
         />
       )}
 
+      {/* Add new book button */}
       <button
         onClick={() => navigate("/add-book")}
         className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-red-500 text-white text-2xl flex items-center justify-center shadow-lg hover:bg-red-600"
