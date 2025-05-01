@@ -2,8 +2,8 @@ import axios from 'axios';
 
 const isDevelopment = import.meta.env.DEV;
 const apiUrl = isDevelopment 
-  ? 'http://localhost:3001/api'
-  : 'https://reminder-media-fe.vercel.app/api';
+  ? 'http://localhost:3000/api'
+  : 'https://your-backend-url.com/api';
 
 export const api = axios.create({
   baseURL: apiUrl,
@@ -17,7 +17,7 @@ if (isDevelopment) {
   api.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 }
 
-// Add a request interceptor
+// Add a request interceptor for JWT
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -38,7 +38,8 @@ api.interceptors.response.use(
     console.error('API Error:', {
       status: error.response?.status,
       data: error.response?.data,
-      url: error.config?.url
+      url: error.config?.url,
+      method: error.config?.method
     });
 
     if (error.response?.status === 401) {
