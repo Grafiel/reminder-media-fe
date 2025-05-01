@@ -1,10 +1,10 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import CreateBookForm from '../components/CreateBookForm';
 import { bookService } from '../utils/bookService';
 
 export default function EditBook() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const { data: book, isLoading, error } = useQuery({
     queryKey: ['book', id],
@@ -34,20 +34,7 @@ export default function EditBook() {
     );
   }
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Edit Book</h1>
-      <CreateBookForm
-        isEdit
-        bookId={id}
-        defaultValues={{
-          title: book.title,
-          description: book.description,
-          price: book.price,
-          category: book.category,
-          discountPercentage: book.discountPercentage,
-        }}
-      />
-    </div>
-  );
+  // Redirect to books page since we're handling editing in the Book component
+  navigate('/books');
+  return null;
 } 
