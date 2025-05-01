@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/BookCard";
 import axios from "../utils/AxiosInstance";
