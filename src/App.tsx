@@ -12,39 +12,52 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Books from "./pages/Books";
 import AddBook from "./pages/AddBook";
-// import EditBook from "./pages/EditBook";
-
+import EditBook from "./pages/EditBook";
 import { AuthProvider } from "./utils/AuthProvider";
 import PrivateRoute from "./utils/PrivateRoute";
 import PublicRoute from "./utils/PublicRoute";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 1000 * 60 * 5, // 5 minutes
+			retry: 1,
+		},
+	},
+});
+
 function App() {
 	const router = createBrowserRouter(
-	createRoutesFromElements(
-		<>
-		<Route element={<BaseLayout />}>
-			<Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-			<Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-		</Route>
+		createRoutesFromElements(
+			<>
+				{/* Public Routes - no Navbar */}
+				<Route element={<BaseLayout />}>
+					<Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+					<Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+				</Route>
 
-		<Route element={<RootLayout />}>
-			<Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
-			<Route path="/books" element={<PrivateRoute><Books /></PrivateRoute>} />
-			<Route path="/books/create" element={<PrivateRoute><AddBook /></PrivateRoute>} />
-			{/* <Route path="/books/:id/edit" element={<PrivateRoute><EditBook /></PrivateRoute>} /> */}
-		</Route>
-		</>
+				{/* Private Routes - with Navbar */}
+				<Route element={<RootLayout />}>
+					<Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+					{/* Book Routes */}
+					<Route path="/books" element={<PrivateRoute><Books /></PrivateRoute>} />
+					<Route path="/books/create" element={<PrivateRoute><AddBook /></PrivateRoute>} />
+					<Route path="/books/:id/edit" element={<PrivateRoute><EditBook /></PrivateRoute>} />
+
+					{/* 404 fallback */}
+					<Route path="*" element={<h1>404 Not Found</h1>} />
+				</Route>
+			</>
 		)
 	);
 
-
 	return (
 		<AuthProvider>
-		<QueryClientProvider client={queryClient}>
-			<RouterProvider router={router} />
-		</QueryClientProvider>
+			<QueryClientProvider client={queryClient}>
+				<RouterProvider router={router} />
+			</QueryClientProvider>
 		</AuthProvider>
 	);
 }
+
 export default App;

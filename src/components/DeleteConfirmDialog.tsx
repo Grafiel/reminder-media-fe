@@ -1,42 +1,83 @@
 // components/DeleteConfirmDialog.tsx
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from '../utils/AxiosInstance';
+import { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 
 interface Props {
-  bookId: string;
-  onCancel: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
 }
 
-export default function DeleteConfirmDialog({ bookId, onCancel }: Props) {
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: () => axios.delete(`/book/${bookId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['book'] });
-    },
-  });
-
+export default function DeleteConfirmDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+}: Props) {
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-md w-80">
-        <p className="mb-4 text-gray-800 font-semibold">Are you sure you want to delete this book?</p>
-        <div className="flex justify-end space-x-3">
-          <button
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-            onClick={() => mutation.mutate(undefined, { onSuccess: onCancel })}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? "Deleting..." : "Delete"}
-          </button>
-          <button
-            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-gray-900"
+                >
+                  {title}
+                </Dialog.Title>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">{message}</p>
+                </div>
+
+                <div className="mt-4 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                    onClick={() => {
+                      onConfirm();
+                      onClose();
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
         </div>
-      </div>
-    </div>
+      </Dialog>
+    </Transition>
   );
 }
