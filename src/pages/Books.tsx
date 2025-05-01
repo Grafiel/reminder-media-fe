@@ -11,7 +11,6 @@ interface Book {
   author: string;
   description: string;
   year: number;
-  image?: string;
 }
 
 const Books = () => {
@@ -41,7 +40,7 @@ const Books = () => {
               key={book.id}
               book={book}
               onEdit={() => navigate(`/edit-book/${book.id}`)}
-              onDelete={() => setSelectedBookId(book.id)} // 🔥 trigger modal
+              onDelete={() => setSelectedBookId(book.id)}
             />
           ))}
         </div>
