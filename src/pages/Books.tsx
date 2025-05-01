@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/BookCard";
-import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import axios from "../utils/AxiosInstance";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Book {
   id: number;
@@ -13,44 +11,62 @@ interface Book {
   year: number;
 }
 
-const Books = () => {
+const book = () => {
   const navigate = useNavigate();
-  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
+  const queryClient = useQueryClient();
 
-  const { data: books = [], isLoading } = useQuery<Book[]>({
-    queryKey: ["book"],
-    queryFn: async () => {
-      const res = await axios.get("/book");
-      return res.data;
+  // Fetch book from backend
+  const token = localStorage.getItem("token");
+
+const { data: book = [], isLoading } = useQuery<Book[]>({
+  queryKey: ["book"],
+  queryFn: async () => {
+    const res = await axios.get("/book", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  },
+});
+
+  // Delete book mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await axios.delete(`/book/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["book"] });
     },
   });
+
+  const deleteBook = (id: number) => {
+    deleteMutation.mutate(id);
+  };
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Books</h1>
+        <h1 className="text-2xl font-semibold">book</h1>
       </div>
 
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {books.map((book) => (
+          {book.map((book) => (
             <BookCard
               key={book.id}
               book={book}
+              onDelete={deleteBook}
               onEdit={() => navigate(`/edit-book/${book.id}`)}
-              onDelete={() => setSelectedBookId(book.id)}
             />
           ))}
         </div>
-      )}
-
-      {selectedBookId !== null && (
-        <DeleteConfirmDialog
-          bookId={selectedBookId.toString()}
-          onCancel={() => setSelectedBookId(null)}
-        />
       )}
 
       <button
@@ -63,4 +79,4 @@ const Books = () => {
   );
 };
 
-export default Books;
+export default book;
