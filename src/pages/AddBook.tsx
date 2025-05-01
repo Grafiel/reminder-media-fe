@@ -1,19 +1,56 @@
+import { useMutation } from "@tanstack/react-query";
+import CreateBookForm, { CreateBookFormInput } from "../components/CreateBookForm";
+import axios from "../utils/AxiosInstance";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import CreateBookForm from "../components/CreateBookForm";
 
-const AddBook = () => {
+const addProduct = async (data: CreateBookFormInput) => {
+  return await axios.post("/api/book", data);
+};
+
+const AddProduct = () => {
+  const { mutate, isSuccess, isPending } = useMutation({
+    mutationFn: addProduct
+  });
   const navigate = useNavigate();
-
-  const handleSuccess = () => {
-    navigate("/books", { replace: true });
-  };
-
+  useEffect(() => {
+    if (isSuccess) {
+      navigate("/product", { replace: true });
+    }
+  }, [isSuccess]);
   return (
     <div className="relative">
-      <h2 className="text-2xl font-bold mb-6 mt-10">Add Book</h2>
-      <CreateBookForm onSuccess={handleSuccess} />
+      {isPending && (
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="flex items-center bg-white/90 px-6 py-3 rounded-lg shadow-lg">
+            <span className="text-2xl mr-4 text-gray-800">Adding...</span>
+            <svg
+              className="animate-spin h-5 w-5 text-gray-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+      )}
+      <h2 className="text-2xl font-bold mb-6 mt-10">Add Product</h2>
+      <CreateBookForm isEdit={false} mutateFn={mutate} />
     </div>
   );
 };
 
-export default AddBook;
+export default AddProduct;

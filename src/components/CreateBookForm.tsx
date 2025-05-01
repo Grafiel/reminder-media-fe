@@ -1,207 +1,185 @@
-// components/CreateBookForm.tsx
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import React, { useEffect } from 'react';
-import axios from '../utils/AxiosInstance';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { UseMutateFunction } from "@tanstack/react-query";
+import React, { useEffect } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 
-export interface BookFormData {
-  id?: string;
+interface CreateBookFormProps {
+  isEdit: boolean;
+  mutateFn: UseMutateFunction<any, Error, CreateBookFormInput, unknown>;
+  defaultInputData?: CreateBookFormInput;
+}
+
+export type CreateBookFormInput = {
   title: string;
-  author: string;
   description: string;
-  year: string;
-}
+  price: number;
+  category: string;
+  discountPercentage: number;
+};
 
-interface Props {
-  onSuccess?: () => void;
-  onCancel?: () => void;
-  isEdit?: boolean;
-  defaultData?: BookFormData;
-}
-
-const CreateBookForm: React.FC<Props> = ({ 
-  onSuccess, 
-  onCancel, 
-  isEdit = false, 
-  defaultData 
-}) => {
+const ProductForm: React.FC<CreateBookFormProps> = (props) => {
   const {
     register,
     handleSubmit,
-    reset,
     setValue,
     formState: { errors }
-  } = useForm<BookFormData>();
-  
-  // Set default values if in edit mode
+  } = useForm<CreateBookFormInput>();
   useEffect(() => {
-    if (isEdit && defaultData) {
-      setValue("title", defaultData.title);
-      setValue("author", defaultData.author);
-      setValue("description", defaultData.description);
-      setValue("year", defaultData.year);
+    if (props.defaultInputData) {
+      setValue("title", props.defaultInputData.title);
+      setValue("description", props.defaultInputData.description);
+      setValue("discountPercentage", props.defaultInputData.discountPercentage);
+      setValue("category", props.defaultInputData.category);
+      setValue("price", props.defaultInputData.price);
     }
-  }, [isEdit, defaultData, setValue]);
-  
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: (bookData: BookFormData) => {
-      if (isEdit && defaultData) {
-        // If editing, use PUT request
-        return axios.put(`/books/${defaultData.id}`, bookData);
-      } else {
-        // If creating new, use POST request
-        return axios.post('/books/add', bookData);
+  }, [props.defaultInputData]);
+  const onSubmit: SubmitHandler<CreateBookFormInput> = (data) => {
+    if (props.isEdit) {
+      if (!confirm("Are you sure want to update product data ? ")) {
+        return;
       }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      reset();
-      if (onSuccess) onSuccess();
-      if (onCancel) onCancel();
     }
-  });
-
-  const onSubmit: SubmitHandler<BookFormData> = (data) => {
-    if (isEdit && !confirm("Are you sure you want to update this book?")) {
-      return;
-    }
-    mutation.mutate(data);
+    props.mutateFn(data);
   };
 
   return (
-    <div className="relative">
-      {mutation.isPending && (
-        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
-          <div className="flex items-center bg-white/90 px-6 py-3 rounded-lg shadow-lg">
-            <span className="text-2xl mr-4 text-gray-800">{isEdit ? "Updating..." : "Creating..."}</span>
-            <svg
-              className="animate-spin h-5 w-5 text-gray-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-          </div>
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Title</label>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="mb-4">
+        <label className="block text-gray-700 font-bold mb-2">Title</label>
+        <input
+          type="text"
+          id="title"
+          className={
+            "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
+            (errors.title && "border-red-500")
+          }
+          placeholder="Product Title"
+          {...register("title", { required: true })}
+        />
+        {errors.title && (
+          <p className="text-red-600 text-xs italic" id="titleError">
+            Title is required.
+          </p>
+        )}
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-gray-700 font-bold mb-2">
+          Description
+        </label>
+        <textarea
+          id="description"
+          {...register("description")}
+          className={
+            "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
+            (errors.description && "border-red-500")
+          }
+          rows={4}
+          placeholder="Product Description"
+          {...register("description", { required: true })}
+        ></textarea>
+
+        {errors.description && (
+          <p className="text-red-600 text-xs italic" id="titleError">
+            Description is required.
+          </p>
+        )}
+      </div>
+
+      <div className="mb-4 relative">
+        <label className="block text-gray-700 font-bold mb-2">Price</label>
+        <div className="flex">
+          <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 rounded-l-md border border-r-0 border-gray-300">
+            $
+          </span>
           <input
-            type="text"
-            id="title"
+            type="number"
+            id="price"
             className={
-              "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
-              (errors.title && "border-red-500")
+              "shadow appearance-none border rounded-r-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
+              (errors.price && "border-red-500")
             }
-            placeholder="Book Title"
-            {...register("title", { required: true })}
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            {...register("price")}
           />
-          {errors.title && (
+          {errors.price && (
             <p className="text-red-600 text-xs italic" id="titleError">
-              Title is required.
+              Price is required.
             </p>
           )}
         </div>
+      </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">Author</label>
+      <div className="mb-4">
+        <label className="block text-gray-700 font-bold mb-2">Category</label>
+        <select
+          id="category"
+          className={
+            "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" +
+            (errors.category && "border-red-500")
+          }
+          {...register("category")}
+        >
+          <option value="beauty">Beauty</option>
+          <option value="fragrance">Fragrance</option>
+          <option value="furniture">Furniture</option>
+        </select>
+        {errors.category && (
+          <p className="text-red-600 text-xs italic" id="titleError">
+            Category is required.
+          </p>
+        )}
+      </div>
+
+      <div className="mb-4 relative">
+        <label className="block text-gray-700 font-bold mb-2">
+          Discount Percentage
+        </label>
+        <div className="flex">
           <input
-            type="text"
-            id="author"
+            {...register("discountPercentage")}
+            type="number"
+            id="discountPercentage"
             className={
-              "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
-              (errors.author && "border-red-500")
+              "shadow appearance-none border rounded-l-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" +
+              (errors.category && "border-red-500")
             }
-            placeholder="Book Author"
-            {...register("author", { required: true })}
+            step="0.01"
+            min="0"
+            max="100"
+            placeholder="0"
           />
-          {errors.author && (
-            <p className="text-red-600 text-xs italic" id="authorError">
-              Author is required.
+          <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 rounded-r-md border border-l-0 border-gray-300">
+            %
+          </span>
+          {errors.discountPercentage && (
+            <p className="text-red-600 text-xs italic" id="titleError">
+              Discount is required.
             </p>
           )}
         </div>
+      </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">
-            Description
-          </label>
-          <textarea
-            id="description"
-            className={
-              "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
-              (errors.description && "border-red-500")
-            }
-            rows={4}
-            placeholder="Book Description"
-            {...register("description", { required: true })}
-          ></textarea>
-
-          {errors.description && (
-            <p className="text-red-600 text-xs italic" id="descriptionError">
-              Description is required.
-            </p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">
-            Publication Year
-          </label>
-          <input
-            type="text"
-            id="year"
-            className={
-              "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " +
-              (errors.year && "border-red-500")
-            }
-            placeholder="Publication Year"
-            {...register("year", { required: true, pattern: /^\d{4}$/ })}
-          />
-          {errors.year && (
-            <p className="text-red-600 text-xs italic" id="yearError">
-              Publication year is required (4 digits).
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
+        {props.isEdit ? (
           <button
             type="submit"
-            className={`${isEdit ? 'bg-blue-500 hover:bg-blue-700' : 'bg-green-500 hover:bg-green-700'} text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            {isEdit ? 'Save Book' : 'Create Book'}
+            Save Product
           </button>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
+        ) : (
+          <button
+            type="submit"
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Add Product
+          </button>
+        )}
+      </div>
+    </form>
   );
 };
 
-export default CreateBookForm;
+export default ProductForm;
