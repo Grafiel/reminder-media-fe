@@ -7,9 +7,16 @@ interface CreateBookModalProps {
   onClose: () => void;
 }
 
+interface FormData {
+  title: string;
+  author: string;
+  description: string;
+  publicationYear: string;
+}
+
 function CreateBookModal({ onClose }: CreateBookModalProps) {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     author: '',
     description: '',
@@ -37,8 +44,7 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
   };
 
   const createMutation = useMutation({
-    mutationFn: (data: typeof formData) => {
-      // Convert publicationYear to number before sending
+    mutationFn: (data: FormData) => {
       return bookService.createBook({
         ...data,
         publicationYear: parseInt(data.publicationYear)
