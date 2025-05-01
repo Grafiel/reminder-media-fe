@@ -22,13 +22,28 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.author.trim()) newErrors.author = 'Author is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (!formData.publicationYear.trim()) newErrors.publicationYear = 'Publication year is required';
+    if (!formData.publicationYear) {
+      newErrors.publicationYear = 'Publication year is required';
+    } else {
+      const year = parseInt(formData.publicationYear);
+      if (isNaN(year)) {
+        newErrors.publicationYear = 'Publication year must be a valid number';
+      } else if (year < 1000 || year > new Date().getFullYear()) {
+        newErrors.publicationYear = 'Please enter a valid year';
+      }
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const createMutation = useMutation({
-    mutationFn: bookService.createBook,
+    mutationFn: (data: typeof formData) => {
+      // Convert publicationYear to number before sending
+      return bookService.createBook({
+        ...data,
+        publicationYear: parseInt(data.publicationYear)
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] });
       onClose();
@@ -43,6 +58,14 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
     if (validateForm()) {
       console.log('Submitting form data:', formData);
       createMutation.mutate(formData);
+    }
+  };
+
+  const handlePublicationYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow numbers
+    if (value === '' || /^\d+$/.test(value)) {
+      setFormData({ ...formData, publicationYear: value });
     }
   };
 
@@ -82,9 +105,12 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
           <div>
             <label className="block text-sm font-medium text-gray-700">Publication Year:</label>
             <input
-              type="text"
+              type="number"
+              min="1000"
+              max={new Date().getFullYear()}
               value={formData.publicationYear}
-              onChange={(e) => setFormData({ ...formData, publicationYear: e.target.value })}
+              onChange={handlePublicationYearChange}
+              placeholder="e.g., 2024"
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.publicationYear ? 'border-red-500' : ''}`}
             />
             {errors.publicationYear && <p className="text-red-500 text-sm mt-1">{errors.publicationYear}</p>}

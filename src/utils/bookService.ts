@@ -5,7 +5,7 @@ export interface Book {
   title: string;
   author: string;
   description: string;
-  publicationYear: string;
+  publicationYear: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,7 +14,7 @@ export interface CreateBookInput {
   title: string;
   author: string;
   description: string;
-  publicationYear: string;
+  publicationYear: number;
 }
 
 export const bookService = {
