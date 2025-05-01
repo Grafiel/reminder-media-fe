@@ -33,7 +33,11 @@ const { data: book = [], isLoading } = useQuery<Book[]>({
   // Delete book mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await axios.delete(`/book/${id}`);
+      await axios.delete(`/book/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["book"] });
