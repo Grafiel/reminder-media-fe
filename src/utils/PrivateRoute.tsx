@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
-import { useAuth } from "./AuthProvider";
 import { Navigate } from "react-router-dom";
+import { useAuth } from "./AuthProvider";
+import { ReactNode } from "react";
 
 const PrivateRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();

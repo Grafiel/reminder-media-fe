@@ -16,13 +16,19 @@ const book = () => {
   const queryClient = useQueryClient();
 
   // Fetch book from backend
-  const { data: book = [], isLoading } = useQuery<Book[]>({
-    queryKey: ["book"],
-    queryFn: async () => {
-      const res = await axios.get("/book");
-      return res.data;
-    },
-  });
+  const token = localStorage.getItem("token");
+
+const { data: book = [], isLoading } = useQuery<Book[]>({
+  queryKey: ["book"],
+  queryFn: async () => {
+    const res = await axios.get("/book", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  },
+});
 
   // Delete book mutation
   const deleteMutation = useMutation({
