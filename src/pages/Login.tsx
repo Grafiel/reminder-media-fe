@@ -21,7 +21,7 @@ const Login = () => {
   const handleLogin = async (data: LoginInput) => {
     try {
       const res = await axios.post<{ access_token: string }>(
-        "/api/auth/login",
+        "auth/login",
         {
           email: data.email,
           password: data.password
