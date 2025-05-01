@@ -8,7 +8,6 @@ import {
 import RootLayout from "./layouts/RootLayout";
 import BaseLayout from "./layouts/BaseLayout";
 import Home from "./pages/Home";
-import Post from "./pages/Post";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Books from "./pages/Books";
@@ -33,8 +32,6 @@ function App() {
 		{/* Private Routes - with Navbar */}
 		<Route element={<RootLayout />}>
 			<Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
-			<Route path="/posts" element={<PrivateRoute><Post /></PrivateRoute>} />
-			
 			{/* Book Routes */}
 			<Route path="/books" element={<PrivateRoute><Books /></PrivateRoute>} />
 			<Route path="/books/create" element={<PrivateRoute><AddBook /></PrivateRoute>} />
