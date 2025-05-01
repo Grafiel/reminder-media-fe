@@ -1,11 +1,21 @@
 import axios from 'axios';
 
+const isDevelopment = import.meta.env.DEV;
+const apiUrl = isDevelopment 
+  ? 'http://localhost:3001/api'
+  : 'https://reminder-media-fe.vercel.app/api';
+
 export const api = axios.create({
-  baseURL: 'http://localhost:3001/api', // Update this with your actual API URL
+  baseURL: apiUrl,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Add CORS headers for development
+if (isDevelopment) {
+  api.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+}
 
 // Add a request interceptor
 api.interceptors.request.use(
@@ -21,10 +31,16 @@ api.interceptors.request.use(
   }
 );
 
-// Add a response interceptor
+// Add a response interceptor with better error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      url: error.config?.url
+    });
+
     if (error.response?.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('token');
