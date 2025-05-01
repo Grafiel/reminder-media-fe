@@ -15,6 +15,17 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
     description: '',
     publicationYear: '',
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.title.trim()) newErrors.title = 'Title is required';
+    if (!formData.author.trim()) newErrors.author = 'Author is required';
+    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    if (!formData.publicationYear.trim()) newErrors.publicationYear = 'Publication year is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const createMutation = useMutation({
     mutationFn: bookService.createBook,
@@ -22,11 +33,17 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
       queryClient.invalidateQueries({ queryKey: ['books'] });
       onClose();
     },
+    onError: (error: any) => {
+      console.error('Create book error:', error);
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate(formData);
+    if (validateForm()) {
+      console.log('Submitting form data:', formData);
+      createMutation.mutate(formData);
+    }
   };
 
   return (
@@ -39,8 +56,9 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.title ? 'border-red-500' : ''}`}
             />
+            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Author:</label>
@@ -48,16 +66,18 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
               type="text"
               value={formData.author}
               onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.author ? 'border-red-500' : ''}`}
             />
+            {errors.author && <p className="text-red-500 text-sm mt-1">{errors.author}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Description:</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.description ? 'border-red-500' : ''}`}
             />
+            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Publication Year:</label>
@@ -65,8 +85,9 @@ function CreateBookModal({ onClose }: CreateBookModalProps) {
               type="text"
               value={formData.publicationYear}
               onChange={(e) => setFormData({ ...formData, publicationYear: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.publicationYear ? 'border-red-500' : ''}`}
             />
+            {errors.publicationYear && <p className="text-red-500 text-sm mt-1">{errors.publicationYear}</p>}
           </div>
           <div className="flex justify-end space-x-4 mt-6">
             <button
