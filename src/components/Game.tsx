@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gameService } from '../utils/gameService';
-import { getProxiedImageUrl } from '../utils/imageProxy';
 
 interface GameProps {
   id: string;
@@ -19,7 +18,6 @@ export default function Game({ id, title, developer, description, releaseYear, c
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const [imageError, setImageError] = useState(false);
-  const proxiedImageUrl = getProxiedImageUrl(coverImageUrl || '');
 
   const deleteMutation = useMutation({
     mutationFn: gameService.deleteGame,
@@ -45,9 +43,9 @@ export default function Game({ id, title, developer, description, releaseYear, c
       </div>
 
       <div>
-        {proxiedImageUrl && !imageError ? (
+        {coverImageUrl && !imageError ? (
           <img 
-            src={proxiedImageUrl}
+            src={coverImageUrl}
             alt={title} 
             className="w-full h-48 object-cover rounded-md mb-4"
             onError={() => setImageError(true)}
