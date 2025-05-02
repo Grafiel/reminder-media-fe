@@ -56,6 +56,8 @@ export default function Song({ id, title, artist, album, releaseYear, coverArtUr
             alt={title} 
             className="w-full h-48 object-cover rounded-md mb-4"
             onError={() => setImageError(true)}
+            crossOrigin="anonymous"
+            referrerPolicy="no-referrer"
           />
         ) : (
           <div className="w-full h-48 bg-gray-200 rounded-md mb-4 flex items-center justify-center">
