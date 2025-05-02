@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { movieService } from '../utils/movieService';
+import { getProxiedImageUrl } from '../utils/imageProxy';
 
 interface MovieProps {
   id: string;
@@ -17,6 +18,7 @@ export default function Movie({ id, title, director, description, releaseYear, p
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const [imageError, setImageError] = useState(false);
+  const proxiedImageUrl = getProxiedImageUrl(posterUrl || '');
 
   const deleteMutation = useMutation({
     mutationFn: movieService.deleteMovie,
@@ -42,14 +44,12 @@ export default function Movie({ id, title, director, description, releaseYear, p
       </div>
 
       <div>
-        {posterUrl && !imageError ? (
+        {proxiedImageUrl && !imageError ? (
           <img 
-            src={posterUrl} 
+            src={proxiedImageUrl}
             alt={title} 
             className="w-full h-48 object-cover rounded-md mb-4"
             onError={() => setImageError(true)}
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
           />
         ) : (
           <div className="w-full h-48 bg-gray-200 rounded-md mb-4 flex items-center justify-center">

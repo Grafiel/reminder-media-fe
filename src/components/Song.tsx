@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { songService } from '../utils/songService';
+import { getProxiedImageUrl } from '../utils/imageProxy';
 
 interface SongProps {
   id: string;
@@ -18,6 +19,7 @@ export default function Song({ id, title, artist, album, releaseYear, coverArtUr
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const [imageError, setImageError] = useState(false);
+  const proxiedImageUrl = getProxiedImageUrl(coverArtUrl || '');
 
   const deleteMutation = useMutation({
     mutationFn: songService.deleteSong,
@@ -50,14 +52,12 @@ export default function Song({ id, title, artist, album, releaseYear, coverArtUr
       </div>
 
       <div>
-        {coverArtUrl && !imageError ? (
+        {proxiedImageUrl && !imageError ? (
           <img 
-            src={coverArtUrl} 
+            src={proxiedImageUrl}
             alt={title} 
             className="w-full h-48 object-cover rounded-md mb-4"
             onError={() => setImageError(true)}
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
           />
         ) : (
           <div className="w-full h-48 bg-gray-200 rounded-md mb-4 flex items-center justify-center">
@@ -273,15 +273,13 @@ function UpdateSongModal({ song, onClose }: UpdateSongModalProps) {
             <label className="block text-sm font-medium text-gray-700">Duration (seconds):</label>
             <input
               type="number"
-              min="0"
               value={formData.duration}
               onChange={handleDurationChange}
-              placeholder="e.g., 180 for 3 minutes"
               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.duration ? 'border-red-500' : ''}`}
             />
             {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
           </div>
-          <div className="flex justify-end space-x-4 mt-6">
+          <div className="flex justify-end space-x-4">
             <button
               type="button"
               onClick={onClose}
@@ -300,4 +298,4 @@ function UpdateSongModal({ song, onClose }: UpdateSongModalProps) {
       </div>
     </div>
   );
-} 
+}
