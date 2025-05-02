@@ -20,7 +20,7 @@ const Login = () => {
 
   const handleLogin = async (data: LoginInput) => {
     try {
-      const res = await axios.post<{ access_token: string }>(
+      const res = await axios.post<{ access_token: string; user: { email: string; createdAt: string } }>(
         "auth/login",
         {
           email: data.email,
@@ -28,7 +28,8 @@ const Login = () => {
         }
       );
       if (res.data) {
-        login(res.data.access_token);
+        login(res.data.access_token, res.data.user);
+        navigate("/");
       } else {
         alert("Username or password is wrong");
       }
@@ -36,9 +37,11 @@ const Login = () => {
       alert("Username or password is wrong");
     }
   };
+
   const { mutate, isPending } = useMutation({
     mutationFn: handleLogin
   });
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-md">

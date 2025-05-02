@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "../utils/AxiosInstance";
 import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "../utils/AuthProvider";
 
 export type RegisterInput = {
   email: string;
@@ -11,25 +12,33 @@ export type RegisterInput = {
 
 const Register = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors }
   } = useForm<RegisterInput>();
+
   const handleRegister = async (data: RegisterInput) => {
     try {
-      await axios.post("/api/auth/register", {
+      const res = await axios.post<{ access_token: string; user: { email: string; createdAt: string } }>("/api/auth/register", {
         email: data.email,
         username: data.username,
         password: data.password
       });
-      alert("User successfully registered");
-      navigate("/login");
+      if (res.data) {
+        login(res.data.access_token, res.data.user);
+        navigate("/");
+      } else {
+        alert("Registration failed");
+      }
     } catch (err) {
-      alert("username or email already registered");
+      alert("Username or email already registered");
     }
   };
+
   const { mutate, isPending } = useMutation({ mutationFn: handleRegister });
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-md">
@@ -38,6 +47,7 @@ const Register = () => {
             <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}
+
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
           Create an Account
         </h2>
@@ -117,7 +127,7 @@ const Register = () => {
               type="submit"
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
             >
-              Register
+              Sign Up
             </button>
           </div>
         </form>
@@ -130,7 +140,7 @@ const Register = () => {
               navigate("/login");
             }}
           >
-            Login
+            Sign in
           </a>
         </p>
       </div>

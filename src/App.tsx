@@ -14,6 +14,7 @@ import Books from "./pages/Books";
 import Movies from "./pages/Movies";
 import Songs from "./pages/Songs";
 import Games from "./pages/Games";
+import Profile from "./pages/Profile";
 import AddBook from "./pages/AddBook";
 import EditBook from "./pages/EditBook";
 import { AuthProvider } from "./utils/AuthProvider";
@@ -55,6 +56,9 @@ function App() {
 
 					{/* Game Routes */}
 					<Route path="/games" element={<PrivateRoute><Games /></PrivateRoute>} />
+
+					{/* Profile Route */}
+					<Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
 					{/* 404 fallback */}
 					<Route path="*" element={<h1>404 Not Found</h1>} />
