@@ -21,13 +21,13 @@ const Register = () => {
 
   const handleRegister = async (data: RegisterInput) => {
     try {
-      const res = await axios.post<{ access_token: string; user: { email: string; createdAt: string } }>("/api/auth/register", {
+      const res = await axios.post<{ access_token: string }>("auth/register", {
         email: data.email,
         username: data.username,
         password: data.password
       });
       if (res.data) {
-        login(res.data.access_token, res.data.user);
+        login(res.data.access_token);
         navigate("/");
       } else {
         alert("Registration failed");

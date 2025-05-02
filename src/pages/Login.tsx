@@ -20,7 +20,7 @@ const Login = () => {
 
   const handleLogin = async (data: LoginInput) => {
     try {
-      const res = await axios.post<{ access_token: string; user: { email: string; createdAt: string } }>(
+      const res = await axios.post<{ access_token: string }>(
         "auth/login",
         {
           email: data.email,
@@ -28,7 +28,7 @@ const Login = () => {
         }
       );
       if (res.data) {
-        login(res.data.access_token, res.data.user);
+        login(res.data.access_token);
         navigate("/");
       } else {
         alert("Username or password is wrong");
